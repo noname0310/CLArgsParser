@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace CLArgsParser.Args
 {
-    class ArgsParserBuilder
+    public class ArgsParserBuilder
     {
         private ArgsParser _argsParser;
 

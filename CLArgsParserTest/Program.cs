@@ -26,45 +26,7 @@ namespace CoreConsoleApp2
             foreach (var item in testCases)
                 ParseTest(commandParser, item);
 
-            string[] randomtest = new string[1000000000];
-            string[] randomtest2 = new string[1000000000];
-            string[] randomtest3 = new string[1000000000];
-            string[] randomtest4 = new string[1000000000];
-            string[] randomtest5 = new string[1000000000];
-            string[] randocszfvsdgbdfmtest2 = new string[1000000000];
-            string[] rando3mtest2 = new string[1000000000];
-            string[] rand3omtest4 = new string[1000000000];
-            string[] random5test5 = new string[1000000000];
-            string[] random6test2 = new string[1000000000];
-            string[] randomtfest3 = new string[1000000000];
-            string[] randomtedst4 = new string[1000000000];
-            string[] randomtescct5 = new string[1000000000];
-            string[] randomtesvt2 = new string[1000000000];
-            string[] randomtefbmtest4 = new string[1000000000];
-            string[] rangvbdomtcvest5 = new string[1000000000];
-            string[] randomgcvbtest2 = new string[1000000000];
-            string[] randomvvtest3 = new string[1000000000];
-            string[] randomtdfdfest4 = new string[1000000000];
-            string[] randovvvzmtest5 = new string[1000000000];
-            string[] randvvobdomtest3 = new string[1000000000];
-            string[] randombntest4 = new string[1000000000];
-            string[] ranvvvvvvvvvvvvvvvdomtest5 = new string[1000000000];
-            string[] randovmtest2 = new string[1000000000];
-            string[] randovmtest3 = new string[1000000000];
-            string[] randvomtest4 = new string[1000000000];
-            string[] randvomtest5 = new string[1000000000];
-            string[] randvvvvomtest2 = new string[1000000000];
-            string[] randvomtest3 = new string[1000000000];
-            string[] randvvomtest4 = new string[1000000000];
-            string[] randzzzzomtest5 = new string[1000000000];
-            string[] randzzomtest2 = new string[1000000000];
-            string[] randomtezzst3 = new string[1000000000];
-            string[] rzzandomtest4 = new string[1000000000];
-            string[] randomzztest5 = new string[1000000000];
-            string[] ranzzdomtest2 = new string[1000000000];
-            string[] randomtzzest3 = new string[1000000000];
-            string[] ranzzdomtest4 = new string[1000000000];
-            string[] randzzomtest5 = new string[1000000000];
+            string[] randomtest = new string[1000];
             for (int i = 0; i < randomtest.Length; i++)
             {
                 randomtest[i] = "/" + RandomString(_random.Next(100));
@@ -88,7 +50,7 @@ namespace CoreConsoleApp2
             string str = Console.ReadLine();
             foreach (var item in commandParser.Parse(str) ?? new Slice[0])
             {
-                Console.Write($"[{item.Parse()}]    ");
+                Console.Write($"[{item.LazyParse(commandParser)}]    ");
             }
             Console.WriteLine();
         }
@@ -99,24 +61,23 @@ namespace CoreConsoleApp2
             Console.WriteLine(str);
             foreach (var item in commandParser.Parse(str) ?? new Slice[0])
             {
-                Console.Write($"[{item.Parse()}]    ");
+                Console.Write($"[{item.LazyParse(commandParser)}]    ");
             }
             Console.WriteLine();
         }
 
-        private static Random _random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF); //랜덤 시드값
+        private static Random _random = new Random((int)DateTime.Now.Ticks & 0x0000FFFF);
         
         public static string RandomString(int _nLength = 12)
         {
-            const string strPool = "abcdefghijklmnopqestuvwxyz0123456789                    \\\\\\\\\\\\\\ \"\"\"\"\""; //문자 생성 풀
+            const string strPool = "abcdefghijklmnopqestuvwxyz0123456789                    \\\\\\\\\\\\\\ \"\"\"\"\"";
             char[] chRandom = new char[_nLength];
             for (int i = 0; i < _nLength; i++ ) 
             { 
                 chRandom[i] = strPool[_random.Next(strPool.Length)]; 
             } 
-            string strRet = new string(chRandom); // char to string
+            string strRet = new string(chRandom);
             return strRet; 
         }
-
     }
 }
