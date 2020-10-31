@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "CLArgsParser/1.0.0": {
+      "CLArgsParser/1.0.1": {
         "runtime": {
           "CLArgsParser.dll": {}
         }
@@ -14,7 +14,7 @@
     }
   },
   "libraries": {
-    "CLArgsParser/1.0.0": {
+    "CLArgsParser/1.0.1": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
