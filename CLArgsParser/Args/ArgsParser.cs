@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CLArgsParser.Args
@@ -155,11 +156,8 @@ namespace CLArgsParser.Args
                 {
                     if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                     {
-                        Slice curConvSpecifier = ConversionSpecifierParse(source.SubSlice(i));
-                        if (curConvSpecifier != specPrefixSlice)
-                            stringBuilder.Append(curConvSpecifier.SubSlice(specPrefixSlice.Length));
-
-                        i += curConvSpecifier.Length - 1;
+                        int curConvSpecifier = LazyConversionSpecifierParse(source.SubSlice(i), stringBuilder);
+                        i += curConvSpecifier - 1;
                     }
                     else if (literalSlice.Length <= source.Length - i && source.SubSlice(i, literalSlice.Length) == literalSlice)
                     {
@@ -176,11 +174,8 @@ namespace CLArgsParser.Args
                 {
                     if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                     {
-                        Slice curConvSpecifier = ConversionSpecifierParse(source.SubSlice(i));
-                        if (curConvSpecifier != specPrefixSlice)
-                            stringBuilder.Append(curConvSpecifier.SubSlice(specPrefixSlice.Length));
-
-                        i += curConvSpecifier.Length - 1;
+                        int curConvSpecifier = LazyConversionSpecifierParse(source.SubSlice(i), stringBuilder);
+                        i += curConvSpecifier - 1;
                     }
                     else
                         stringBuilder.Append(source[i]);
@@ -239,10 +234,8 @@ namespace CLArgsParser.Args
 
                 if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                 {
-                    Slice curConvSpecifier = ConversionSpecifierParse(source.SubSlice(i));
-                    if (curConvSpecifier != specPrefixSlice)
-                        stringBuilder.Append(curConvSpecifier.SubSlice(specPrefixSlice.Length));
-                    i += curConvSpecifier.Length - 1;
+                    int curConvSpecifier = LazyConversionSpecifierParse(source.SubSlice(i), stringBuilder);
+                    i += curConvSpecifier - 1;
                 }
                 else
                     stringBuilder.Append(source[i]);
@@ -260,6 +253,20 @@ namespace CLArgsParser.Args
             }
 
             return source.SubSlice(0, SpecifierPrefix.Length);
+        }
+
+        private int LazyConversionSpecifierParse(Slice source, StringBuilder stringBuilder)
+        {
+            foreach (var item in ConvSpecifiers)
+            {
+                if (item.Key.Length <= source.Length - 1 && source.SubSlice(1, item.Key.Length) == item.Key)
+                {
+                    stringBuilder.Append(item.Value);
+                    return source.SubSlice(0, item.Key.Length + SpecifierPrefix.Length).Length;
+                }
+            }
+
+            return SpecifierPrefix.Length;
         }
     }
 }
