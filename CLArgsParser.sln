@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CLArgsParserTest", "CLArgsParserTest\CLArgsParserTest.csproj", "{258173CD-0033-439A-9F3C-2FDC75CE55B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLArgsParser", "CLArgsParser\CLArgsParser.csproj", "{8C0A44D6-FBEE-4F43-980E-F19AF6B7454A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CLArgsParser", "CLArgsParser\CLArgsParser.csproj", "{8C0A44D6-FBEE-4F43-980E-F19AF6B7454A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "egTest", "egTest\egTest.csproj", "{B563ACF5-0463-474F-AEB4-779E7A9B5766}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{8C0A44D6-FBEE-4F43-980E-F19AF6B7454A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C0A44D6-FBEE-4F43-980E-F19AF6B7454A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8C0A44D6-FBEE-4F43-980E-F19AF6B7454A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B563ACF5-0463-474F-AEB4-779E7A9B5766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B563ACF5-0463-474F-AEB4-779E7A9B5766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B563ACF5-0463-474F-AEB4-779E7A9B5766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B563ACF5-0463-474F-AEB4-779E7A9B5766}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

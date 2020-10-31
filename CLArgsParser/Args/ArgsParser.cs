@@ -14,7 +14,7 @@ namespace CLArgsParser.Args
         public List<ConversionSpecifier> ConvSpecifiers { get; set; }
         public ParserOption<string> Literal { get; set; }
 
-        private List<Slice> _result;
+        private readonly List<Slice> _result;
 
         public ArgsParser()
         {
