@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace CLArgsParser.Args
 {
@@ -6,7 +7,11 @@ namespace CLArgsParser.Args
     {
         public static string Parse(this Slice slice)
         {
+            StringBuilder stringBuilder = new StringBuilder();
 
+
+
+            return stringBuilder.ToString();
         }
     }
 
@@ -16,18 +21,21 @@ namespace CLArgsParser.Args
         public List<ConversionSpecifier> ConvSpecifiers { get; set; }
         public ParserOption<string> Literal { get; set; }
 
+        private List<Slice> _result;
+
         public ArgsParser()
         {
             SpecifierPrefix = string.Empty;
             ConvSpecifiers = new List<ConversionSpecifier>();
             Literal = new ParserOption<string>(false, string.Empty);
+            _result = new List<Slice>();
         }
 
         public virtual Slice[] Parse(string source) => Parse(source.Slice(0, source.Length));
 
         public virtual Slice[] Parse(Slice source)
         {
-            List<Slice> result = new List<Slice>();
+            _result.Clear();
 
             if (Literal.Enable)
             {
@@ -50,12 +58,12 @@ namespace CLArgsParser.Args
                             continue;
                         }
 
-                        if (result.Count == 0)
-                            result.Add(CurConvSpecifier);
+                        if (_result.Count == 0)
+                            _result.Add(CurConvSpecifier);
                         else if (0 <= i - 1 && i - 1 < source.Length && source[i - 1] != ' ')
-                            result[^1] = result[^1].ExpendEnd(CurConvSpecifier.Length);
+                            _result[^1] = _result[^1].ExpendEnd(CurConvSpecifier.Length);
                         else
-                            result.Add(CurConvSpecifier);
+                            _result.Add(CurConvSpecifier);
 
                         i += CurConvSpecifier.Length - 1;
                     }
@@ -69,12 +77,12 @@ namespace CLArgsParser.Args
                             continue;
                         }
 
-                        if (result.Count == 0)
-                            result.Add(CurLiteralParse);
+                        if (_result.Count == 0)
+                            _result.Add(CurLiteralParse);
                         else if (0 <= i - 1 && i - 1 < source.Length && source[i - 1] != ' ')
-                            result[^1] = result[^1].ExpendEnd(CurLiteralParse.Length);
+                            _result[^1] = _result[^1].ExpendEnd(CurLiteralParse.Length);
                         else
-                            result.Add(CurLiteralParse);
+                            _result.Add(CurLiteralParse);
 
                         i += CurLiteralParse.Length - 1;
                     }
@@ -82,12 +90,12 @@ namespace CLArgsParser.Args
                     {
                         Slice CurSpaceParse = SpaceParse(source.SubSlice(i));
 
-                        if (result.Count == 0)
-                            result.Add(CurSpaceParse);
+                        if (_result.Count == 0)
+                            _result.Add(CurSpaceParse);
                         else if (0 <= i - 1 && i - 1 < source.Length && source[i - 1] != ' ')
-                            result[^1] = result[^1].ExpendEnd(CurSpaceParse.Length);
+                            _result[^1] = _result[^1].ExpendEnd(CurSpaceParse.Length);
                         else
-                            result.Add(CurSpaceParse);
+                            _result.Add(CurSpaceParse);
 
                         i += CurSpaceParse.Length - 1;
                     }
@@ -113,12 +121,12 @@ namespace CLArgsParser.Args
                             continue;
                         }
 
-                        if (result.Count == 0)
-                            result.Add(CurConvSpecifier.SliceFromSlice(1, CurConvSpecifier.Length - 1));
+                        if (_result.Count == 0)
+                            _result.Add(CurConvSpecifier.SliceFromSlice(1, CurConvSpecifier.Length - 1));
                         else if (0 <= i - 1 && i - 1 < source.Length && source[i - 1] != ' ')
-                            result[^1] = result[^1].ExpendEnd(CurConvSpecifier.Length);
+                            _result[^1] = _result[^1].ExpendEnd(CurConvSpecifier.Length);
                         else
-                            result.Add(CurConvSpecifier.SliceFromSlice(1, CurConvSpecifier.Length - 1));
+                            _result.Add(CurConvSpecifier.SliceFromSlice(1, CurConvSpecifier.Length - 1));
 
                         i += CurConvSpecifier.Length - 1;
                     }
@@ -126,19 +134,19 @@ namespace CLArgsParser.Args
                     {
                         Slice CurSpaceParse = SpaceParse(source.SubSlice(i));
 
-                        if (result.Count == 0)
-                            result.Add(CurSpaceParse);
+                        if (_result.Count == 0)
+                            _result.Add(CurSpaceParse);
                         else if (0 <= i - 1 && i - 1 < source.Length && source[i - 1] != ' ')
-                            result[^1] = result[^1].ExpendEnd(CurSpaceParse.Length);
+                            _result[^1] = _result[^1].ExpendEnd(CurSpaceParse.Length);
                         else
-                            result.Add(CurSpaceParse);
+                            _result.Add(CurSpaceParse);
 
                         i += CurSpaceParse.Length - 1;
                     }
                 }
             }
 
-            return result.ToArray();
+            return _result.ToArray();
         }
 
         public Slice SpaceParse(Slice source)
@@ -180,11 +188,9 @@ namespace CLArgsParser.Args
 
         public Slice ConversionSpecifierParse(Slice source)
         {
-            source = source.SubSlice(1);
-
             foreach (var item in ConvSpecifiers)
             {
-                if (item.Key.Length < source.Length && source.SubSlice(0, item.Key.Length) == item.Key)
+                if (item.Key.Length < source.Length - 1 && source.SubSlice(1, item.Key.Length) == item.Key)
                     return source.SubSlice(0, item.Key.Length + SpecifierPrefix.Length);
             }
 
