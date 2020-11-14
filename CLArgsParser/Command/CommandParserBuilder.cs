@@ -1,4 +1,5 @@
-﻿using CLArgsParser.Args;
+﻿using System;
+using CLArgsParser.Args;
 
 namespace CLArgsParser.Command
 {
@@ -8,7 +9,7 @@ namespace CLArgsParser.Command
 
         public CommandParserBuilder(ArgsParser argsParser)
         {
-            _commandParser = new CommandParser(argsParser);
+            _commandParser = new(argsParser);
         }
 
         public static CommandParser BuildDefault()
@@ -20,6 +21,10 @@ namespace CLArgsParser.Command
 
         public CommandParserBuilder UseCommandPrefix(string prefix)
         {
+            if (prefix == string.Empty || prefix == null)
+                throw new ArgumentNullException(nameof(prefix), "\"prefix\" can not be string.Empty or null");
+            if (prefix.IndexOf(' ') != -1)
+                throw new ArgumentException("\"prefix\" can not contain space", nameof(prefix));
             _commandParser.CommandPrefix.Enable = true;
             _commandParser.CommandPrefix.Value = prefix;
             return this;

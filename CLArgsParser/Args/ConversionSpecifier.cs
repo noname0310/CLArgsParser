@@ -2,19 +2,11 @@
 {
     public struct ConversionSpecifier
     {
-        public readonly string Key;
-        public readonly string Value;
+        public string Key { get; init; }
+        public string Value { get; init; }
 
-        public ConversionSpecifier(string value)
-        {
-            Key = value;
-            Value = value;
-        }
+        public ConversionSpecifier(string value) : this(value, value) { }
 
-        public ConversionSpecifier(string key, string value)
-        {
-            Key = key;
-            Value = value;
-        }
+        public ConversionSpecifier(string key, string value) => (Key, Value) = (key, value);
     }
 }

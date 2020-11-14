@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace CLArgsParser.Args
 {
     public static class SliceParseExtension
     {
-        public static string LazyParse(this Slice slice, ArgsParser argsParser) => argsParser.LazyParse(slice);
+        public static string LazyParse(this in Slice slice, ArgsParser argsParser) => argsParser.LazyParse(slice);
     }
 
     public class ArgsParser
@@ -20,14 +20,28 @@ namespace CLArgsParser.Args
         public ArgsParser()
         {
             SpecifierPrefix = string.Empty;
-            ConvSpecifiers = new List<ConversionSpecifier>();
-            Literal = new ParserOption<string>(false, string.Empty);
-            _result = new List<Slice>();
+            ConvSpecifiers = new();
+            Literal = new(false, string.Empty);
+            _result = new();
         }
 
-        public virtual Slice[] Parse(string source) => Parse(source.Slice(0, source.Length));
+        public string[] SlowParse(string source)
+        {
+            List<string> result = new();
+            Slice[] parsedSource = Parse(source);
+            if (parsedSource == null)
+                return Array.Empty<string>();
+            foreach (var item in parsedSource)
+            {
+                string lazyParsedArg = LazyParse(item);
+                result.Add(lazyParsedArg);
+            }
+            return result.ToArray();
+        }
 
-        public virtual Slice[] Parse(Slice source)
+        public virtual Slice[] Parse(string source) => Parse((Slice)source);
+
+        public virtual Slice[] Parse(in Slice source)
         {
             _result.Clear();
 
@@ -42,15 +56,9 @@ namespace CLArgsParser.Args
                     {
                         continue;
                     }
-                    else if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
+                    else if (specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                     {
                         Slice curConvSpecifier = ConversionSpecifierParse(source.SubSlice(i));
-                        
-                        if (curConvSpecifier.Length < specPrefixSlice.Length)
-                        {
-                            i += curConvSpecifier.Length - 1;
-                            continue;
-                        }
 
                         if (_result.Count == 0)
                             _result.Add(curConvSpecifier);
@@ -105,15 +113,9 @@ namespace CLArgsParser.Args
                     {
                         continue;
                     }
-                    else if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
+                    else if (specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                     {
                         Slice curConvSpecifier = ConversionSpecifierParse(source.SubSlice(i));
-
-                        if (curConvSpecifier.Length < specPrefixSlice.Length)
-                        {
-                            i += curConvSpecifier.Length - 1;
-                            continue;
-                        }
 
                         if (_result.Count == 0)
                             _result.Add(curConvSpecifier);
@@ -143,9 +145,9 @@ namespace CLArgsParser.Args
             return _result.ToArray();
         }
 
-        public string LazyParse(Slice source)
+        public string LazyParse(in Slice source)
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 
             Slice specPrefixSlice = SpecifierPrefix.ToSlice();
             Slice literalSlice = Literal.Value.ToSlice();
@@ -154,7 +156,7 @@ namespace CLArgsParser.Args
             {
                 for (int i = 0; i < source.Length; i++)
                 {
-                    if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
+                    if (specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                     {
                         int curConvSpecifier = LazyConversionSpecifierParse(source.SubSlice(i), stringBuilder);
                         i += curConvSpecifier - 1;
@@ -172,7 +174,7 @@ namespace CLArgsParser.Args
             {
                 for (int i = 0; i < source.Length; i++)
                 {
-                    if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
+                    if (specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                     {
                         int curConvSpecifier = LazyConversionSpecifierParse(source.SubSlice(i), stringBuilder);
                         i += curConvSpecifier - 1;
@@ -185,24 +187,24 @@ namespace CLArgsParser.Args
             return stringBuilder.ToString();
         }
 
-        private Slice SpaceParse(Slice source)
+        private Slice SpaceParse(in Slice source)
         {
             Slice specPrefixSlice = SpecifierPrefix.ToSlice();
             Slice literalSlice = Literal.Value.ToSlice();
-            source = source.TrimStart();
+            Slice trimedsource = source.TrimStart();
 
-            for (int i = 0; i < source.Length; i++)
+            for (int i = 0; i < trimedsource.Length; i++)
             {
-                if (source[i] == ' ' || 
-                    (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice) ||
-                    (literalSlice.Length <= source.Length - i && source.SubSlice(i, literalSlice.Length) == literalSlice))
-                    return source.SubSlice(0, i);
+                if (trimedsource[i] == ' ' || 
+                    (specPrefixSlice.Length <= trimedsource.Length - i && trimedsource.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice) ||
+                    (literalSlice.Length <= trimedsource.Length - i && trimedsource.SubSlice(i, literalSlice.Length) == literalSlice))
+                    return trimedsource.SubSlice(0, i);
             }
 
-            return source;
+            return trimedsource;
         }
 
-        private Slice LiteralParse(Slice source)
+        private Slice LiteralParse(in Slice source)
         {
             Slice specPrefixSlice = SpecifierPrefix.ToSlice();
             Slice literalSlice = Literal.Value.ToSlice();
@@ -212,7 +214,7 @@ namespace CLArgsParser.Args
                 if (literalSlice.Length <= source.Length - i && source.SubSlice(i, literalSlice.Length) == literalSlice)
                     return source.SubSlice(0, i + literalSlice.Length);
 
-                else if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
+                else if (specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                 {
                     Slice curConvSpecifier = ConversionSpecifierParse(source.SubSlice(i));
                     i += curConvSpecifier.Length - 1;
@@ -222,7 +224,7 @@ namespace CLArgsParser.Args
             return source;
         }
 
-        private int LazyLiteralParse(Slice source, StringBuilder stringBuilder)
+        private int LazyLiteralParse(in Slice source, StringBuilder stringBuilder)
         {
             Slice specPrefixSlice = SpecifierPrefix.ToSlice();
             Slice literalSlice = Literal.Value.ToSlice();
@@ -232,7 +234,7 @@ namespace CLArgsParser.Args
                 if (literalSlice.Length <= source.Length - i && source.SubSlice(i, literalSlice.Length) == literalSlice)
                     return i;
 
-                if (specPrefixSlice.Length != 0 && specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
+                if (specPrefixSlice.Length <= source.Length - i && source.SubSlice(i, specPrefixSlice.Length) == specPrefixSlice)
                 {
                     int curConvSpecifier = LazyConversionSpecifierParse(source.SubSlice(i), stringBuilder);
                     i += curConvSpecifier - 1;
@@ -244,7 +246,7 @@ namespace CLArgsParser.Args
             return source.Length;
         }
 
-        private Slice ConversionSpecifierParse(Slice source)
+        private Slice ConversionSpecifierParse(in Slice source)
         {
             foreach (var item in ConvSpecifiers)
             {
@@ -255,7 +257,7 @@ namespace CLArgsParser.Args
             return source.SubSlice(0, SpecifierPrefix.Length);
         }
 
-        private int LazyConversionSpecifierParse(Slice source, StringBuilder stringBuilder)
+        private int LazyConversionSpecifierParse(in Slice source, StringBuilder stringBuilder)
         {
             foreach (var item in ConvSpecifiers)
             {

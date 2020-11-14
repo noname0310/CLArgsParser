@@ -21,7 +21,7 @@ namespace CoreConsoleApp2
                 @"/a\\\b d""e f""g h",    //    [a\\\b] 	        [de fg]        	[h]
                 @"/a\\\""b c d",          //    [a\"b] 	            [c]       	    [d]
                 @"/a\\\\""b c"" d e",     //    [a\\b c] 	        [d] 	        [e]
-                "/ze lbgf l \\h"
+                @"/ze lbgf l \h"          //    [ze]                [lbgf]          [l]            [h]
             };
             foreach (var item in testCases)
                 ParseTest(commandParser, item);
@@ -48,7 +48,8 @@ namespace CoreConsoleApp2
         {
             Console.WriteLine("---------------------------------------");
             string str = Console.ReadLine();
-            foreach (var item in commandParser.Parse(str) ?? new Slice[0])
+            Console.Write("Parse:         ");
+            foreach (var item in commandParser.Parse(str) ?? Array.Empty<Slice>())
             {
                 Console.Write($"[{item.LazyParse(commandParser)}]    ");
             }
@@ -59,7 +60,8 @@ namespace CoreConsoleApp2
         {
             Console.WriteLine("---------------------------------------");
             Console.WriteLine(str);
-            foreach (var item in commandParser.Parse(str) ?? new Slice[0])
+            Console.Write("Parse:         ");
+            foreach (var item in commandParser.Parse(str) ?? Array.Empty<Slice>())
             {
                 Console.Write($"[{item.LazyParse(commandParser)}]    ");
             }

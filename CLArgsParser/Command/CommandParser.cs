@@ -8,7 +8,7 @@ namespace CLArgsParser.Command
 
         public CommandParser() : base()
         {
-            CommandPrefix = new ParserOption<string>(false, string.Empty);
+            CommandPrefix = new(false, string.Empty);
         }
 
         public CommandParser(ArgsParser argsParser) : this()
@@ -18,9 +18,9 @@ namespace CLArgsParser.Command
             Literal = argsParser.Literal;
         }
 
-        public override Slice[] Parse(string source) => Parse(source.Slice(0, source.Length));
+        public override Slice[] Parse(string source) => Parse((Slice)source);
 
-        public override Slice[] Parse(Slice source)
+        public override Slice[] Parse(in Slice source)
         {
             if (!CommandPrefix.Enable)
                 return base.Parse(source);

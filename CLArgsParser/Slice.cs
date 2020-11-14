@@ -8,17 +8,17 @@ namespace CLArgsParser
     {
         public static Slice Slice(this string str, int start, int end) => new Slice(str, start, end);
 
-        public static Slice ToSlice(this string str) => str.Slice(0, str.Length);
+        public static Slice ToSlice(this string str) => (Slice)str;
     }
 
-    public struct Slice : IEnumerable<char>, IEnumerable, IComparable<Slice>, IComparable, IEquatable<Slice>
+    public readonly struct Slice : IEnumerable<char>, IEnumerable, IComparable<Slice>, IComparable, IEquatable<Slice>
     {
         public string Str => _str[Start..End];
         public char this[int i] => _str[i + Start];
         public int Length => End - Start;
+        public int Start { get; init; }
+        public int End { get; init; }
 
-        public readonly int Start;
-        public readonly int End;
         private readonly string _str;
 
         public Slice(string str, int start, int end)
@@ -40,7 +40,7 @@ namespace CLArgsParser
             Slice center;
             Slice outer;
 
-            if (other.Length < Length)
+            if (Length < other.Length)
             {
                 center = this;
                 outer = other;
@@ -60,7 +60,12 @@ namespace CLArgsParser
                     return 1;
                 index += 1;
             }
-            return 0;
+            if (Length < other.Length)
+                return -1;
+            if (other.Length < Length)
+                return 1;
+            else
+                return 0;
         }
 
         int IComparable.CompareTo(object obj)
@@ -70,7 +75,7 @@ namespace CLArgsParser
             return CompareTo((Slice)obj);
         }
 
-        public static bool operator ==(Slice a, Slice b)
+        public static bool operator ==(in Slice a, in Slice b)
         {
             if (ReferenceEquals(a._str, b._str) &&
                 a.Start == b.Start &&
@@ -84,21 +89,29 @@ namespace CLArgsParser
                 return false;
         }
 
-        public static bool operator ==(Slice a, string b)
+        public static bool operator ==(in Slice a, string b)
         {
             if (a.Length != b.Length)
                 return false;
-            else if (a.CompareTo(b.Slice(0, b.Length)) == 0)
+            else if (a.CompareTo((Slice)b) == 0)
                 return true;
             else
                 return false;
         }
 
-        public static bool operator !=(Slice a, Slice b) => !(a == b);
+        public static bool operator !=(in Slice a, in Slice b) => !(a == b);
 
-        public static bool operator !=(Slice a, string b) => !(a == b);
+        public static bool operator !=(in Slice a, string b) => !(a == b);
 
-        public IEnumerator<char> GetEnumerator() => new SliceEnumerator(this);
+        public static implicit operator string(in Slice slice) => slice.Str;
+
+        public static explicit operator Slice(string str) => new Slice(str, 0, str.Length);
+
+        public IEnumerator<char> GetEnumerator()
+        {
+            for (int position = Start; position < End; position++)
+                yield return _str[position];
+        }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -119,85 +132,40 @@ namespace CLArgsParser
             int end;
 
             for (start = Start; start < End; start++)
-            {
-                if (_str[start] != ' ')
+                if (_str[start] != ' ' && _str[start] != '\r' && _str[start] != '\n')
                     break;
-            }
 
-            for (end = End; Start < end; end--)
-            {
-                if (_str[end - 1] != ' ')
+            for (end = End - 1; start < end; end--)
+                if (_str[end] != ' ' && _str[end] != '\r' && _str[end] != '\n')
                     break;
-            }
 
-            if (start == Start && end == End)
-                return this;
-            else
-                return new Slice(_str, start, end);
+            return new(_str, start, end + 1);
         }
 
         public Slice TrimStart()
         {
             for (int i = Start; i < End; i++)
-            {
-                if (_str[i] != ' ')
-                    return new Slice(_str, i, End);
-            }
+                if (_str[i] != ' ' && _str[i] != '\r' && _str[i] != '\n')
+                    return new(_str, i, End);
             return this;
         }
 
         public Slice TrimEnd()
         {
             for (int i = End - 1; Start <= i; i--)
-            {
-                if (_str[i] != ' ')
-                    return new Slice(_str, Start, i);
-            }
+                if (_str[i] != ' ' && _str[i] != '\r' && _str[i] != '\n')
+                    return new(_str, Start, i + 1);
             return this;
         }
 
-        public Slice SliceFromSlice(int start, int end) => new Slice(_str, Start + start, Start + end);
+        public Slice SliceFromSlice(int start, int end) => new(_str, Start + start, Start + end);
 
-        public Slice SubSlice(int startindex) => new Slice(_str, Start + startindex, End);
+        public Slice SubSlice(int startindex) => new(_str, Start + startindex, End);
 
-        public Slice SubSlice(int startindex, int length) => new Slice(_str, Start + startindex, Start + startindex + length);
+        public Slice SubSlice(int startindex, int length) => new(_str, Start + startindex, Start + startindex + length);
 
-        public Slice ExpendStart(int AddLength) => new Slice(_str, Start - AddLength, End);
+        public Slice ExpendStart(int AddLength) => new(_str, Start - AddLength, End);
 
-        public Slice ExpendEnd(int AddLength) => new Slice(_str, Start, End + AddLength);
-
-        private struct SliceEnumerator : IEnumerator, IEnumerator<char>
-        {
-            public char Current => _slice[_position];
-            object IEnumerator.Current => Current;
-
-            private Slice _slice;
-            private int _position;
-
-            public SliceEnumerator(Slice slice)
-            {
-                _slice = slice;
-                _position = _slice.Start - 1;
-            }
-
-            public void Dispose() { }
-
-            public bool MoveNext()
-            {
-                _position += 1;
-                if (_slice.End <= _position)
-                {
-                    Reset();
-                    return false;
-                }
-                else
-                    return true;
-            }
-
-            public void Reset()
-            {
-                _position = _slice.Start - 1;
-            }
-        }
+        public Slice ExpendEnd(int AddLength) => new(_str, Start, End + AddLength);
     }
 }
